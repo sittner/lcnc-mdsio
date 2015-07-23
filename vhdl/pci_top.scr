@@ -1,0 +1,9 @@
+run
+-ifn #PROJECT#.prj
+-ifmt mixed
+-ofn #PROJECT#.ngc
+-ofmt NGC
+-p xc3s1500-4-fg456
+-top #PROJECT#
+-opt_mode Speed
+-opt_level 2
