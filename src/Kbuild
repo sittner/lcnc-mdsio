@@ -1,0 +1,11 @@
+obj-m += mdsio_pci.o
+mdsio_pci-objs := \
+    mdsio_main.o \
+    mdsio_dac.o \
+    mdsio_dio.o \
+    mdsio_enc.o \
+    mdsio_pci.o \
+    mdsio_phpe.o \
+    mdsio_step.o \
+    mdsio_wdt.o
+

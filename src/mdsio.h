@@ -18,8 +18,6 @@
 #ifndef _MDSIO_H_
 #define _MDSIO_H_
 
-#include <linux/ctype.h>
-
 #define MDSIO_MAX_MODS_PER_PORT 16
 
 // list macros

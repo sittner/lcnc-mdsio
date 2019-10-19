@@ -16,12 +16,13 @@
 //    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 //
 
-#include <linux/pci.h>
-#include <linux/ctype.h>
-
 #include "rtapi.h"
 #include "rtapi_app.h"
 #include "rtapi_string.h"
+#include "rtapi_pci.h"
+#include "rtapi_slab.h"
+
+#include <linux/pci.h>
 
 #include "hal.h"
 
@@ -33,12 +34,12 @@ MODULE_AUTHOR("Sascha Ittner <sascha.ittner@modusoft.de>");
 MODULE_DESCRIPTION("Driver for mdsIO on FPGA based pci boards");
 MODULE_SUPPORTED_DEVICE("mdsIO PCI board");
 
-static struct pci_device_id mdsio_pci_tbl[] = {
+static struct rtapi_pci_device_id mdsio_pci_tbl[] = {
   {
     .vendor = MDSIO_PCILITE_VID,
     .device = MDSIO_PCILITE_PID,
-    .subvendor = PCI_ANY_ID,
-    .subdevice = PCI_ANY_ID,
+    .subvendor = MDSIO_PCILITE_SUB_VID,
+    .subdevice = MDSIO_PCILITE_SUB_PID,
   },
   {0,}
 };
@@ -70,22 +71,22 @@ static mdsio_dev_t mdsio_device = {
   .proc_write_output = mdsio_pci_write_data
 };
 
-static int __devinit mdsio_pci_probe(struct pci_dev *dev, const struct pci_device_id *ent) {
+static int mdsio_pci_probe(struct rtapi_pci_dev *dev, const struct rtapi_pci_device_id *ent) {
   mdsio_pci_board_t *board;
   mdsio_port_t *port;
   int err;
 
   // Enabling PCI device
-  if (pci_enable_device(dev) < 0) {
-    dev_err(&dev->dev, "Enabling PCI device failed\n");
+  if (rtapi_pci_enable_device(dev) < 0) {
+    rtapi_print_msg(RTAPI_MSG_ERR, "%s: Enabling PCI device failed\n", MDSIO_PCI_NAME);
     err = -ENOMEM;
     goto fail0;
   }
 
   // Allocating board structures to hold addresses, ...
-  board = kzalloc(sizeof(mdsio_pci_board_t), GFP_KERNEL);
+  board = rtapi_kzalloc(sizeof(mdsio_pci_board_t), GFP_KERNEL);
   if (board == NULL) {
-    dev_err(&dev->dev, "Unable to allocate memory\n");
+    rtapi_print_msg(RTAPI_MSG_ERR, "%s: Unable to allocate memory\n", MDSIO_PCI_NAME);
     err = -ENOMEM;
     goto fail1;
   }
@@ -93,49 +94,47 @@ static int __devinit mdsio_pci_probe(struct pci_dev *dev, const struct pci_devic
   board->pci_dev = dev;
 
   // Remap configuration space and controller memory area
-  board->start = pci_resource_start(dev, 0);
-  board->len   = pci_resource_len(dev, 0);
-  board->base  = ioremap_nocache(board->start, board->len);
+  board->base  = rtapi_pci_ioremap_bar(dev, 0);
   if (board->base == NULL) {
-    dev_err(&dev->dev, "IOREMAP failed\n");
+    rtapi_print_msg(RTAPI_MSG_ERR, "%s: IOREMAP failed\n", MDSIO_PCI_NAME);
     err = -ENOMEM;
     goto fail2;
   }
-  dev_info(&dev->dev, "Board at 0x%p mapped to 0x%p, len 0x%8.8x, irq %d\n", (void *)board->start, board->base, board->len, dev->irq);
+  rtapi_print_msg(RTAPI_MSG_INFO, "%s: Board mapped to 0x%p.\n", MDSIO_PCI_NAME, board->base);
 
   // create mdsio port
   port = mdsio_create_port(&mdsio_device, board);
   if (port == NULL) {
-    dev_err(&dev->dev, "mdsio_create_port failed\n");
+    rtapi_print_msg(RTAPI_MSG_ERR, "%s: mdsio_create_port failed\n", MDSIO_PCI_NAME);
     err = -ENOMEM;
     goto fail3;
   }
-  pci_set_drvdata(dev, port);
+  rtapi_pci_set_drvdata(dev, port);
 
   return 0;
 
 fail3:
-  iounmap(board->base);
+  rtapi_iounmap(board->base);
 fail2:
-  kfree(board);
+  rtapi_kfree(board);
 fail1:
-  pci_disable_device(dev);
+  rtapi_pci_disable_device(dev);
 fail0:
   return err;
 }
 
-static void mdsio_pci_remove(struct pci_dev *dev) {
-  mdsio_port_t *port = pci_get_drvdata(dev);
+static void mdsio_pci_remove(struct rtapi_pci_dev *dev) {
+  mdsio_port_t *port = dev->driver_data;
   mdsio_pci_board_t *board = (mdsio_pci_board_t *)(port->device_data);
 
   mdsio_destroy_port(port);
-  pci_set_drvdata(dev, NULL);
-  iounmap(board->base);
-  kfree(board);
-  pci_disable_device(dev);
+  rtapi_pci_set_drvdata(dev, NULL);
+  rtapi_iounmap(board->base);
+  rtapi_kfree(board);
+  rtapi_pci_disable_device(dev);
 }
 
-static struct pci_driver mdsio_pci_driver = {
+static struct rtapi_pci_driver mdsio_pci_driver = {
   .name = MDSIO_PCI_NAME,
   .id_table = mdsio_pci_tbl,
   .probe = mdsio_pci_probe,
@@ -152,7 +151,7 @@ int rtapi_app_main(void) {
     return err;
   }
 
-  err = pci_register_driver(&mdsio_pci_driver);
+  err = rtapi_pci_register_driver(&mdsio_pci_driver);
   if (err != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, "%s: error %d registering PCI driver\n", MDSIO_PCI_NAME, err);
     mdsio_exit(&mdsio_device);
@@ -164,7 +163,7 @@ int rtapi_app_main(void) {
 }
 
 void rtapi_app_exit(void) {
-  pci_unregister_driver(&mdsio_pci_driver);
+  rtapi_pci_unregister_driver(&mdsio_pci_driver);
   rtapi_print_msg(RTAPI_MSG_INFO, "%s: driver unloaded\n", MDSIO_PCI_NAME);
   mdsio_exit(&mdsio_device);
 }

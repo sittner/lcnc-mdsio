@@ -18,7 +18,6 @@
 #ifndef _MDSIO_DIO_H_
 #define _MDSIO_DIO_H_
 
-#include <linux/ctype.h>
 #include "mdsio.h"
 
 #define MDSIO_DIO_TYPE 2

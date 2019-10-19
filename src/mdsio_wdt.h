@@ -18,7 +18,6 @@
 #ifndef _MDSIO_WDT_H_
 #define _MDSIO_WDT_H_
 
-#include <linux/ctype.h>
 #include "mdsio.h"
 
 #define MDSIO_WDT_TYPE 1

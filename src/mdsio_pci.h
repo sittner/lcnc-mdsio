@@ -18,6 +18,8 @@
 #ifndef _MDSIO_PCI_H_
 #define _MDSIO_PCI_H_
 
+#include <rtapi_pci.h>
+
 #define MDSIO_PCI_VERSION "1.0.0"
 #define MDSIO_PCI_NAME    "mdsio_pci"
 
@@ -26,11 +28,12 @@
 #define MDSIO_PCILITE_VID 0x4150
 #define MDSIO_PCILITE_PID 0x0007
 
+#define MDSIO_PCILITE_SUB_VID 0x1172
+#define MDSIO_PCILITE_SUB_PID 0x0202
+
 typedef struct mdsio_pci_board_t {
-  struct pci_dev *pci_dev;
-  resource_size_t start;
-  void __iomem *base;
-  resource_size_t len;
+  struct rtapi_pci_dev *pci_dev;
+  void rtapi__iomem *base;
 } mdsio_pci_board_t;
 
 #endif

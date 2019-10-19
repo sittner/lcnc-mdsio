@@ -18,7 +18,6 @@
 #ifndef _MDSIO_DAC_H_
 #define _MDSIO_DAC_H_
 
-#include <linux/ctype.h>
 #include "mdsio.h"
 
 #define MDSIO_DAC_TYPE 3

@@ -18,7 +18,6 @@
 #ifndef _MDSIO_ENC_H_
 #define _MDSIO_ENC_H_
 
-#include <linux/ctype.h>
 #include "mdsio.h"
 
 #define MDSIO_ENC_TYPE 4

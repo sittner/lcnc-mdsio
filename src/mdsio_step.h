@@ -18,7 +18,6 @@
 #ifndef _MDSIO_STEP_H_
 #define _MDSIO_STEP_H_
 
-#include <linux/ctype.h>
 #include "mdsio.h"
 
 #define MDSIO_STEP_TYPE 5

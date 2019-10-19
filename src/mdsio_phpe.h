@@ -18,7 +18,6 @@
 #ifndef _MDSIO_PHPE_H_
 #define _MDSIO_PHPE_H_
 
-#include <linux/ctype.h>
 #include "mdsio.h"
 
 #define MDSIO_PHPE_TYPE 6

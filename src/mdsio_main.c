@@ -16,10 +16,8 @@
 //    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 //
 
-#include <linux/ctype.h>
-#include <linux/slab.h>
-
 #include "rtapi.h"
+#include "rtapi_slab.h"
 #include "rtapi_string.h"
 
 #include "hal.h"
@@ -114,7 +112,7 @@ mdsio_port_t *mdsio_create_port(mdsio_dev_t *device, void *device_data) {
   char name[HAL_NAME_LEN + 1];
 
   // allocate port data
-  port = kzalloc(sizeof(mdsio_port_t), GFP_KERNEL);
+  port = rtapi_kzalloc(sizeof(mdsio_port_t), RTAPI_GFP_KERNEL);
   if (port == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, "%s: ERROR: Unable to allocate port memory\n", device->name);
     goto fail0;
@@ -164,12 +162,12 @@ mdsio_port_t *mdsio_create_port(mdsio_dev_t *device, void *device_data) {
   }
 
   // allocate input and output data buffer
-  port->input_data = kzalloc(port->data_len, GFP_KERNEL);
+  port->input_data = rtapi_kzalloc(port->data_len, RTAPI_GFP_KERNEL);
   if (port->input_data == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, "%s: ERROR: Unable to allocate input memory\n", device->name);
     goto fail1;
   }
-  port->output_data = kzalloc(port->data_len, GFP_KERNEL);
+  port->output_data = rtapi_kzalloc(port->data_len, RTAPI_GFP_KERNEL);
   if (port->output_data == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, "%s: ERROR: Unable to allocate output memory\n", device->name);
     goto fail2;
@@ -196,10 +194,10 @@ mdsio_port_t *mdsio_create_port(mdsio_dev_t *device, void *device_data) {
   return port;
 
 fail2:
-  kfree(port->input_data);
+  rtapi_kfree(port->input_data);
 fail1:
   mdsio_remove_modules(port);
-  kfree(port);
+  rtapi_kfree(port);
 fail0:
   return NULL;
 }
@@ -210,10 +208,10 @@ void mdsio_destroy_port(mdsio_port_t *port) {
   // remove from list
   MDSIO_LIST_REMOVE(device->first_port, device->last_port, port);
 
-  kfree(port->output_data);
-  kfree(port->input_data);
+  rtapi_kfree(port->output_data);
+  rtapi_kfree(port->input_data);
   mdsio_remove_modules(port);
-  kfree(port);
+  rtapi_kfree(port);
 
   device->port_count--;
 }
@@ -246,7 +244,7 @@ mdsio_mod_t *mdsio_add_module(mdsio_port_t *port, uint16_t type, uint16_t offset
   mdsio_mod_t *module;
   int err;
   
-  module = kzalloc(sizeof(mdsio_mod_t), GFP_KERNEL);
+  module = rtapi_kzalloc(sizeof(mdsio_mod_t), RTAPI_GFP_KERNEL);
   if (module == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, "%s: ERROR: Unable to allocate module memory\n", device->name);
     goto fail0;
@@ -296,7 +294,7 @@ mdsio_mod_t *mdsio_add_module(mdsio_port_t *port, uint16_t type, uint16_t offset
   return module;
 
 fail1:
-  kfree(module);
+  rtapi_kfree(module);
 fail0:
   return NULL;
 }
@@ -321,7 +319,7 @@ void mdsio_remove_module(mdsio_mod_t *module) {
     module->proc_cleanup(module);
   }
 
-  kfree(module);
+  rtapi_kfree(module);
   port->module_count--;
 }
 
