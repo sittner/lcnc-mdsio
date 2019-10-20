@@ -53,14 +53,30 @@ uint32_t mdsio_pci_read_conf(mdsio_port_t *port, int word) {
 
 void mdsio_pci_read_data(mdsio_port_t *port) {
   mdsio_pci_board_t *board = (mdsio_pci_board_t *)port->device_data;
+  int size = port->data_len;
+  void *buffer = port->input_data;
+  void *src = board->base + port->data_offset;
 
-  memcpy(port->input_data, (board->base + port->data_offset), port->data_len);
+  while (size > 0) {
+    *(rtapi_u32*)buffer = *(rtapi_u32*)src;
+    src += 4;
+    buffer += 4;
+    size -=4;
+  }
 }
 
 void mdsio_pci_write_data(mdsio_port_t *port) {
   mdsio_pci_board_t *board = (mdsio_pci_board_t *)port->device_data;
+  int size = port->data_len;
+  void *buffer = port->output_data;
+  void *dest = board->base + port->data_offset;
 
-  memcpy((board->base + port->data_offset), port->output_data, port->data_len);
+  while (size > 0) {
+    *(rtapi_u32*)dest = *(rtapi_u32*)buffer;
+    dest += 4;
+    buffer += 4;
+    size -=4;
+  }
 }
 
 static mdsio_dev_t mdsio_device = {
