@@ -1,0 +1,11 @@
+Source: lcnc-mdsio
+Section: unknown
+Priority: extra
+Maintainer: Sascha Ittner <sascha.ittner@modusoft.de>
+Build-Depends: debhelper (>= 8.0.0), linuxcnc-dev | linuxcnc-sim-dev | linuxcnc-uspace-dev | machinekit-dev
+Standards-Version: 3.9.3
+
+Package: lcnc-mdsio
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, linuxcnc | linuxcnc-sim | linuxcnc-uspace | machinekit
+Description: LinuxCNC EtherCAT HAL driver
