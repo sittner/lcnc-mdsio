@@ -51,3 +51,9 @@ vhdl/build/*.xrpt
 vhdl/build/xst/
 vhdl/build/*.xwbt
 
+debian/*.log
+debian/*.substvars
+debian/files
+debian/.debhelper/
+debian/lcnc-mdsio/
+
