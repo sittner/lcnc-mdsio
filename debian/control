@@ -8,4 +8,4 @@ Standards-Version: 3.9.3
 Package: lcnc-mdsio
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, linuxcnc | linuxcnc-sim | linuxcnc-uspace | machinekit
-Description: LinuxCNC EtherCAT HAL driver
+Description: LinuxCNC FPGA-Based IO-Subsystem HAL driver
